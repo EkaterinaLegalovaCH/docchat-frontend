@@ -1,42 +1,16 @@
-# DocChat — React Frontend
+# DocChat frontend
 
-A React + Vite + TypeScript frontend for the DocChat RAG application.
-Upload PDFs and ask questions with AI-generated answers and citations.
+React, Vite, and TypeScript UI for the DocChat backend. The existing simple upload, document list, filters, and citation-based chat layout is kept intentionally easy to study.
 
-## Quick Start
+## Local setup
 
 ```bash
 npm install
-npm run dev        # starts on http://localhost:5173
-npm run build      # production build to dist/
+cp .env.example .env
+npm run dev
+npm run build
 ```
 
-The Vite dev server proxies `/api` requests to `http://localhost:8000`
-(the FastAPI backend). See `vite.config.ts`.
+`VITE_API_URL` is empty for local Vite proxying and should be the deployed backend URL in production. The frontend must never contain `SUPABASE_KEY`, `OPENAI_API_KEY`, or any other provider credential.
 
-## Environment
-
-Set `VITE_API_URL` to your backend URL in production (e.g. Vercel + Fly.io):
-
-```bash
-VITE_API_URL=https://your-backend.fly.dev
-```
-
-## Project Structure
-
-```
-src/
-  components/
-    Header.tsx           # App branding
-    DocumentUpload.tsx   # Drag-and-drop PDF upload
-    DocumentList.tsx     # List + delete documents
-    CitationCard.tsx     # Expandable source citation
-    ChatInterface.tsx    # Q&A input + answer display
-  services/
-    api.ts               # HTTP client for all backend calls
-  types/
-    index.ts             # TypeScript interfaces matching API models
-  App.tsx                # Root component, state, layout
-  main.tsx               # Entry point
-  index.css              # Global styles
-```
+For a free-tier demo, deploy this app to Vercel and the FastAPI app to Render, then set `VITE_API_URL` in Vercel and add the Vercel origin to backend `CORS_ORIGINS`. Hosting may be free; OpenAI API access, credits, pricing, and rate limits are account-dependent.

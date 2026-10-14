@@ -79,8 +79,40 @@ body {
   max-width: var(--max-width);
   margin: 0 auto;
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   gap: 1rem;
+}
+
+.header-account {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.header-email {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-signout,
+.auth-switch {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.35rem 0.65rem;
+}
+
+.btn-signout:hover,
+.auth-switch:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .header-title {
@@ -93,6 +125,69 @@ body {
 .header-subtitle {
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+/* ── Authentication ──────────────────────────────────────────────────── */
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: min(100%, 420px);
+}
+
+.auth-card h1 {
+  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.auth-intro {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.auth-form input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.auth-submit {
+  margin-top: 0.25rem;
+}
+
+.auth-switch {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.success-msg {
+  color: var(--success);
+  font-size: 0.85rem;
 }
 
 /* ── Card ────────────────────────────────────────────────────────────── */

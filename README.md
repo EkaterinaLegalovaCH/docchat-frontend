@@ -110,19 +110,23 @@ For a production build:
 npm run build
 ```
 
-The frontend reads the backend URL from `VITE_API_URL`:
+The frontend reads these public configuration values from Vite environment variables (copy `.env.example` to `.env`):
 
 ```text
 VITE_API_URL=http://localhost:8000
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
 ```
 
-For production, set it to:
+For production, set `VITE_API_URL` to `https://docchat-backend-dt3x.onrender.com`, and set the Supabase project URL plus its browser-safe anon key. The anon key is intended for browser code; never put `SUPABASE_KEY`, a service-role key, `OPENAI_API_KEY`, or any other server-side credential in Vite variables.
 
-```text
-VITE_API_URL=https://docchat-backend-dt3x.onrender.com
-```
+### Authentication and document privacy
 
-The frontend must never contain `SUPABASE_KEY`, `OPENAI_API_KEY`, or any other server-side provider credential.
+Users must sign up or sign in with email and password before the document workspace is shown. Supabase persists the session in the browser and the sign-out button clears it. The API client reads the current session for every request and sends `Authorization: Bearer <access token>`. A 401 signs the user out once and returns them to the sign-in form; requests are not retried indefinitely.
+
+The backend is responsible for validating tokens and enforcing ownership. New documents are assigned to their authenticated user, and list, delete, and chat retrieval must be scoped to that user. Existing legacy rows without an owner remain orphaned and must not be exposed to authenticated users. Apply the corresponding backend migration before using this frontend against a protected deployment.
+
+Never upload confidential, personal, medical, legal, or financial files to the public demo.
 
 ## Example demo questions
 
@@ -159,9 +163,8 @@ npm run build
 
 This is a portfolio project rather than a finished public SaaS product. Known limitations include:
 
-- the current demo deployment is unauthenticated;
-- documents are not yet isolated per user;
-- rate limiting and usage quotas still need to be added;
+- the deployed frontend/backend must be configured with matching Supabase Auth and ownership migration settings before this flow is live;
+- rate limiting and usage quotas are enforced by the backend, not by this frontend;
 - scanned PDFs require OCR, which is not currently included;
 - the model is instructed to cite sources, but answer faithfulness is not independently scored;
 - chat history is kept in the frontend session rather than persisted on the server.

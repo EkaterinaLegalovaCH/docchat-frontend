@@ -1,17 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { Header } from "./components/Header";
+import { AuthForm } from "./components/AuthForm";
 import { DocumentUpload } from "./components/DocumentUpload";
 import { DocumentList } from "./components/DocumentList";
 import { ChatInterface } from "./components/ChatInterface";
+import { authClient } from "./services/auth";
 import { api } from "./services/api";
 import type { DocumentUploadResponse, DocumentListItem } from "./types";
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [documents, setDocuments] = useState<DocumentListItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const hasDocuments = documents.length > 0;
+
+  useEffect(() => {
+    let mounted = true;
+    void authClient.auth.getSession().then(({ data }) => {
+      if (mounted) {
+        setSession(data.session);
+        setAuthLoading(false);
+      }
+    });
+    const { data: { subscription } } = authClient.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+      if (!nextSession) {
+        setDocuments([]);
+        setSelectedIds([]);
+      }
+      setAuthLoading(false);
+    });
+    return () => { mounted = false; subscription.unsubscribe(); };
+  }, []);
 
   const loadDocuments = useCallback(async () => {
     setLoading(true);
@@ -27,7 +51,9 @@ export default function App() {
     }
   }, []);
 
-  useEffect(() => { void loadDocuments(); }, [loadDocuments]);
+  useEffect(() => {
+    if (session) void loadDocuments();
+  }, [session, loadDocuments]);
 
   const handleUploaded = useCallback((doc: DocumentUploadResponse) => {
     const item: DocumentListItem = { ...doc };
@@ -42,15 +68,18 @@ export default function App() {
 
   const toggleSelected = (id: string) => setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
 
+  if (authLoading) return <main className="auth-page"><p className="empty-state">Checking your session…</p></main>;
+  if (!session) return <AuthForm />;
+
   return (
     <div className="app">
-      <Header />
+      <Header user={session.user} onSignOut={() => { void authClient.auth.signOut(); }} />
       <main className="main-layout">
         <aside className="sidebar">
           <DocumentUpload onUploaded={handleUploaded} />
           {loading && <p className="empty-state">Loading documents…</p>}
           {loadError && <p className="error-msg">{loadError} <button onClick={() => void loadDocuments()}>Retry</button></p>}
-          {!loading && <DocumentList documents={documents} onDelete={handleDelete} />}
+          {!loading && !loadError && <DocumentList documents={documents} onDelete={handleDelete} />}
           {hasDocuments && (
             <section className="card filter-section">
               <h2>Filter Questions</h2>
